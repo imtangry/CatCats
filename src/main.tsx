@@ -1,20 +1,16 @@
 import {createRoot} from 'react-dom/client'
-import WebApp from '@twa-dev/sdk'
 import './index.css'
 import App from './App.tsx'
-
-WebApp.ready();
-
-createRoot(document.getElementById('root')!).render(
-    <Root/>
-)
-import {useEffect, useMemo} from 'react';
-import {useLaunchParams} from '@telegram-apps/sdk-react';
+import {useMemo} from 'react';
 import {TonConnectUIProvider} from '@tonconnect/ui-react';
 
 import {TonClientProvider} from './context/ton-client-context.tsx';
 import {AppStateProvider} from './context/app-context.tsx';
 import {ErrorBoundary} from "./components/ErrorBoundary.tsx";
+
+import WebApp from '@twa-dev/sdk'
+
+WebApp.ready();
 
 function ErrorBoundaryError({error}: { error: unknown }) {
     return (
@@ -34,17 +30,12 @@ function ErrorBoundaryError({error}: { error: unknown }) {
 }
 
 function Inner() {
-    const debug = useLaunchParams().startParam === 'debug';
     const manifestUrl = useMemo(() => {
         return new URL('tonconnect-manifest.json', window.location.href).toString();
     }, []);
 
     // Enable debug mode to see all the methods sent and events received.
-    useEffect(() => {
-        if (debug) {
-            import('eruda').then((lib) => lib.default.init());
-        }
-    }, [debug]);
+
 
     return (
         <TonConnectUIProvider
@@ -60,10 +51,14 @@ function Inner() {
     );
 }
 
-export function Root() {
+function Root() {
     return (
         <ErrorBoundary fallback={ErrorBoundaryError}>
             <Inner/>
         </ErrorBoundary>
     );
 }
+
+createRoot(document.getElementById('root')!).render(
+    <Root/>
+)
