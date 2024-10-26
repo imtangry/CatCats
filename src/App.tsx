@@ -8,8 +8,17 @@ import cat1 from './assets/cat-1.png'
 import cat2 from './assets/cat-2.png'
 import headerBG from './assets/card-header-bg.png'
 
+import {useTonAddress, useTonConnectModal} from '@tonconnect/ui-react';
+import {useCallback} from "react";
+
 function App() {
     const count = 32
+    const address = useTonAddress();
+    const {open} = useTonConnectModal();
+
+    const handleConnectWallet = useCallback(() => {
+        open();
+    }, [open]);
 
     const energyList = [
         {
@@ -67,6 +76,13 @@ function App() {
                         <span>{count}</span>
                     </div>
                 </Button>
+
+                {address ? (
+                    <div className="w-20"> {address} </div>
+                ) : (
+                    <button onClick={handleConnectWallet} className="px-4 py-2 bg-[#8E381E] text-white rounded-xl w-full ml-auto"> 连接钱包 </button>
+                )}
+
             </div>
             <div className="flex-1 w-full flex flex-col items-center px-3 space-y-4 pt-4 pb-20 overflow-auto">
                 {energyList.map((item, index) => (
