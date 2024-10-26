@@ -31,7 +31,8 @@ function ErrorBoundaryError({error}: { error: unknown }) {
 
 function Inner() {
     const manifestUrl = useMemo(() => {
-        return new URL('tonconnect-manifest.json', window.location.href).toString();
+        // return new URL('tonconnect-manifest.json', window.location.href).toString();
+        return new URL('tonconnect-manifest.json', 'https://imtangry.github.io/CatCats/').toString();
     }, []);
 
     // Enable debug mode to see all the methods sent and events received.

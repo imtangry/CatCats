@@ -7,18 +7,25 @@ import e3 from './assets/buy-e-3.png'
 import cat1 from './assets/cat-1.png'
 import cat2 from './assets/cat-2.png'
 import headerBG from './assets/card-header-bg.png'
+import close from './assets/close.png'
 
-import {useTonAddress, useTonConnectModal} from '@tonconnect/ui-react';
-import {useCallback} from "react";
+import {useTonAddress, useTonConnectModal, useTonWallet, useTonConnectUI, CHAIN} from '@tonconnect/ui-react';
+import {useCallback, useEffect, useState} from "react";
 
 function App() {
     const count = 32
+    const [showDetails, setShowDetails] = useState(false)
+    const [balance, setBalance] = useState(0)
     const address = useTonAddress();
     const {open} = useTonConnectModal();
+    const [tonConnectUI] = useTonConnectUI();
+
+    const wallet = useTonWallet();
 
     const handleConnectWallet = useCallback(() => {
         open();
     }, [open]);
+
 
     const energyList = [
         {
@@ -59,10 +66,28 @@ function App() {
         },
     ]
 
+    // 怎么监听某个地址的事件
+    const getBalance = async (address: string, chain: CHAIN | null) => {
+        const response = await fetch(`https://${chain === CHAIN.MAINNET ? '' : 'testnet.'}toncenter.com/api/v3/addressInformation?address=${address}`);
+        const data = await response.json();
+        const balance = data.balance;
+        console.log(balance)
+        setBalance(parseFloat(String(balance / 1e9)));
+    }
+
+    useEffect(() => {
+        if (wallet?.account?.address) {
+            (async () => {
+                console.log('getBalance')
+                await getBalance(wallet.account.address, wallet.account.chain ?? null);
+            })()
+        }
+    }, [wallet]);
+
     return (
         <div
             className="flex flex-col items-center justify-center h-screen bg-[#FFF2EA] border-4 border-[#FFCDAD] overflow-hidden">
-            <div className='w-full flex px-3 py-3 space-x-4'>
+            <div className='w-full flex items-center px-3 py-3 space-x-4 overflow-hidden'>
                 <Button bg1='#8E381E' bg2='#FFA577' className="w-20">
                     <div className="flex items-center text-white text-xl">
                         <img src={coins} alt="logo" className="w-5 h-5 mr-1"/>
@@ -78,9 +103,13 @@ function App() {
                 </Button>
 
                 {address ? (
-                    <div className="w-20"> {address} </div>
+                    <button onClick={() => setShowDetails(!showDetails)}
+                            className="flex-1 flex items-center px-4 py-2 bg-[#8E381E] text-white rounded-xl ml-auto overflow-hidden ">
+                        <span className='flex-1 text-ellipsis whitespace-nowrap overflow-hidden'>{address}</span>
+                    </button>
                 ) : (
-                    <button onClick={handleConnectWallet} className="px-4 py-2 bg-[#8E381E] text-white rounded-xl w-full ml-auto"> 连接钱包 </button>
+                    <button onClick={handleConnectWallet}
+                            className="flex-1 px-4 py-2 bg-[#8E381E] text-white rounded-xl ml-auto"> 连接钱包 </button>
                 )}
 
             </div>
@@ -127,11 +156,50 @@ function App() {
                 ))}
             </div>
             <div
-                className="flex absolute bottom-0 left-0 right-0 w-full items-center justify-around h-16 bg-gray-200"
+                className="flex absolute bottom-0 left-0 right-0 w-full items-center justify-around h-16 bg-gray-200 z-20"
                 style={{
                     background: 'rgba(255, 255, 255, 0.2)',
                     backdropFilter: 'blur(10px)'
                 }}>
+            </div>
+
+            <div
+                className="flex flex-col space-y-4 absolute bottom-0 left-0 right-0 w-full bg-white z-30 transition-all duration-400 rounded-lg pt-16 px-4 pb-16 overflow-hidden"
+                style={{
+                    height: showDetails ? '80vh' : '0',
+                    padding: showDetails ? '16px' : '0',
+                    boxShadow: '3px 0px 10px rgba(0, 0, 0, 0.3)',
+                }}
+            >
+                <div
+                    className="absolute flex items-center justify-center right-2 top-2 h-12 w-12 pt-1 rounded-2xl bg-[#E09667]"
+                    onClick={() => setShowDetails(false)}>
+                    <img src={close} alt="cat" className="w-6 h-6" style={{transform: 'rotate(14.11deg)'}}/>
+                </div>
+
+                <div className="flex flex-col">
+                    <span>Connected wallet: {wallet?.name}</span>
+                    <span>Device: {wallet?.device?.appName}</span>
+                    <span>Chain: {wallet?.account?.chain === CHAIN.MAINNET ? 'Mainnet' : 'Testnet'}</span>
+                </div>
+
+                <div>
+                    <span className="font-bold">Address: </span>
+                    <p className="text-gray-500">{address}</p>
+                </div>
+
+                <div>
+                    <span className="font-bold">Balance: </span>
+                    <p className="text-gray-500">{balance}</p>
+                </div>
+
+                <div
+                    className="absolute bottom-2 left-0 right-0 h-16 flex flex-col items-center text-white text-xl w-full bg-white rounded-lg px-4">
+                    <button onClick={async () => await tonConnectUI.disconnect()}
+                            className="bg-[#EC4444] border border-[#851E1E] text-white rounded-xl w-full py-2 mt-4 font-bold text-xl">断开连接
+                    </button>
+                </div>
+
             </div>
         </div>
     )
