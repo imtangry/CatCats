@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts"],"version":"5.6.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/button.tsx","./src/components/errorboundary.tsx","./src/context/app-context.tsx","./src/context/ton-client-context.tsx","./src/hooks/useasyncinitialize.ts","./src/hooks/usemainbutton.ts","./src/hooks/usetonconnect.ts"],"version":"5.6.3"}

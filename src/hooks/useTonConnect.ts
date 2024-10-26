@@ -18,8 +18,7 @@ export const useTonConnect = (): {
   const wallet = useTonWallet();
   const { tonClient } = useContext(TonClientContext);
 
-  // const walletAddress = wallet?.account?.address ? Address.parse(wallet.account.address) : undefined;
-  const walletAddress = wallet?.account?.address ? wallet.account.address : undefined;
+  const walletAddress = wallet?.account?.address ? Address.parse(wallet.account.address) : undefined;
   return {
     sender: {
       send: async (args: SenderArguments) => {
